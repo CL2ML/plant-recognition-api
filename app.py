@@ -1,31 +1,106 @@
-from flask import Flask, jsonify, request
-#import pickle
+print('setting the environment...')
+# Import env variables
+import os
+from dotenv import load_dotenv
+from config import config
+# Load environmental variables from .env in development stage
+basedir = os.path.abspath(os.path.dirname(__file__))
+dotenv_path = os.path.join(basedir, '.env')
+if os.path.exists(dotenv_path):
+    load_dotenv(dotenv_path)
 
-# load model
-#model = pickle.load(open('model.pkl','rb'))
+# import libraries
+print('importing libraries...')
+import time
+# import fastai libs
+from fastai import *
+from fastai.vision import *
+import fastai
 
-# apppip install torch_nightly
+# import settings
+from resources.settings import * # import
+
+print('done! Setting up the directories and the model structure...\n')
+
+
+#-----------------------------------
+# Prior wrangling and model setup
+
+# set dir structure
+def make_dirs(labels, data_dir):
+	root_dir = os.getcwd()
+	#make_dirs = ['train', 'valid', 'test']
+	make_dirs = ['data']
+	for n in make_dirs:
+		name = os.path.join(root_dir, data_dir, n)
+		for each in labels:
+			os.makedirs(os.path.join(name, each), exist_ok=True)
+
+make_dirs(labels=labels, data_dir=data_dir) # comes from settings.py
+path = Path(data_dir)
+
+# download model weights if not already saved (model can be stored elsewhere if needed)
+path_to_model = os.path.join(data_dir, 'models', trained_model_file) # MOdel name taken from settings.py
+print(path_to_model,'\n')
+if not os.path.exists(path_to_model):
+	print('done! Model weights were not found, downloading them...\n')
+	os.makedirs(os.path.join(data_dir, 'models'), exist_ok=True)
+	filename = Path(path_to_model)
+	r = requests.get(MODEL_URL)
+	filename.write_bytes(r.content)
+
+print('done! Loading up the saved model weights...\n')
+
+defaults.device = torch.device('cpu') # run inference on cpu
+empty_data = ImageDataBunch.single_from_classes(
+	path, labels, ds_tfms=get_transforms(), size=224, num_workers=0).normalize(imagenet_stats)
+learn = cnn_learner(empty_data, base_arch = models.resnet34, pretrained=False) # model_type coming from settings.py
+learn = load_learner(path = os.path.join(data_dir, 'models'), file = trained_model_file)
+
+print('done! Initiating the model...\n')
+
+#-------------------------------------------
+# The Flask App routings
+from flask import Flask, request, jsonify
+#from PIL import Image
+
 app = Flask(__name__)
+app.config.from_object(config[os.environ.get('FLASK_CONFIG')])
 
-# routes
-@app.route('/', methods=['POST'])
+@app.route("/")
+def hello():
+	return "Image classification API v0.1\n"
 
+@app.route('/api/classify', methods=['POST'])
 def predict():
-    # get data
-    data = request.get_json(force=True)
 
-    # convert data into dataframe
-    data.update((x, [y]) for x, y in data.items())
-    data_df = pd.DataFrame.from_dict(data)
+	file = request.files['image']
 
-    # predictions
-    result = model.predict(data_df)
+	img = open_image(file)
+	print('Image opened succesfully with Fastai open_image()...')
 
-    # send back to browser
-    output = {'results': int(result[0])}
+	app.logger.info("Classifying image")
+	t = time.time() # get execution time
 
-    # return data
-    return jsonify(results=output)
+	pred_class, pred_idx, outputs = learn.predict(img)
+
+	confidence = float(outputs[pred_idx])
+	
+	print('The predicted plant class is: ', pred_class)
+
+	print('pred_idx', pred_idx)
+
+	print('outputs', confidence)
+
+	dt = time.time() - t
+	app.logger.info("Execution time: %0.02f seconds" % (dt))
+	app.logger.info("Image classified as %s with a confidence level of %s" % (str(pred_class), str(confidence)))
+
+	return jsonify({'plant_class':str(pred_class), 'confidence':confidence})
+
 
 if __name__ == '__main__':
-    app.run(port = 5000, debug=True)
+	app.run(debug=True, port=PORT)
+
+
+
