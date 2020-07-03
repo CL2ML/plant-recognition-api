@@ -69,9 +69,9 @@ app.config.from_object(config[os.environ.get('FLASK_CONFIG')])
 
 @app.route("/")
 def hello():
-	return "Image classification API v0.1\n"
+	return "Image classification APIv1\n"
 
-@app.route('/api/classify', methods=['POST'])
+@app.route('/api/v1.0/classify', methods=['POST'])
 def predict():
 
 	file = request.files['image']
