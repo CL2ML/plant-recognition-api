@@ -15,7 +15,6 @@ import time
 # import fastai libs
 from fastai import *
 from fastai.vision import *
-import fastai
 
 # import settings
 from resources.settings import * # import
