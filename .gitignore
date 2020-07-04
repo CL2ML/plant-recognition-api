@@ -59,4 +59,7 @@ docs/_build/
 
 *.sqlite
 
+# Further items
 images/
+*.pkl
+*.pth
