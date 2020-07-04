@@ -2,7 +2,7 @@
 
 ## Specs
 
-- The API is deployed on render.com (render is directly linked to git repositories)
+- The API is deployed on render.com (render is directly linked to git)
 - The image recognition process is carried out on an individual server in order to separate the cloud resources (web app <-> web service)
 - The Model data (.pkl file) is downloaded by the app from a cloud storage url while rendering in order to keep the app as lightweight as possible
 

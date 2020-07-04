@@ -5,10 +5,7 @@ data_dir = 'resources/'
 trained_model_file = 'round-3-stage-6a-plant-classifier_trained_model.pkl'
 
 # set the URL where you can download your model weights
-MODEL_URL = None
-
-# set some deployment settings
-PORT = 8080
+MODEL_URL = 'https://www.dropbox.com/s/38bcw19dcwjkozo/round-3-stage-6a-plant-classifier_trained_model.pkl?dl=0'
 
 # add your custom labels
 labels = ['Abutilon_Hybridum',

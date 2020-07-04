@@ -39,7 +39,7 @@ make_dirs(labels=labels, data_dir=data_dir) # comes from settings.py
 path = Path(data_dir)
 
 # download model weights if not already saved (model can be stored elsewhere if needed)
-path_to_model = os.path.join(data_dir, 'models', trained_model_file) # MOdel name taken from settings.py
+path_to_model = os.path.join(data_dir, 'models', trained_model_file) # Model name taken from settings.py
 print(path_to_model,'\n')
 if not os.path.exists(path_to_model):
 	print('done! Model weights were not found, downloading them...\n')
