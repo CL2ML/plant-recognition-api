@@ -64,11 +64,17 @@ from flask import Flask, request, jsonify
 #from PIL import Image
 
 app = Flask(__name__)
-app.config.from_object(config[os.environ.get('FLASK_CONFIG')])
+
+# Pass loading the config environment variable when rendered on render.com
+# For render.com the default options are then applied, i.e. production mode
+try:
+    app.config.from_object(config[os.environ.get('FLASK_CONFIG')])
+except Exception as:
+    pass
 
 @app.route("/")
 def hello():
-	return "Image classification APIv1\n"
+	return "Image classification API v1.0\n"
 
 @app.route('/api/v1.0/classify', methods=['POST'])
 def predict():
@@ -99,7 +105,7 @@ def predict():
 
 
 if __name__ == '__main__':
-	app.run(debug=True, port=PORT)
+	app.run()
 
 
 

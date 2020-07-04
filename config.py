@@ -12,8 +12,7 @@ class Config(object):
     DEBUG = False
     TESTING = False
     CSRF_ENABLED = True
-    SECRET_KEY = os.environ.get('SECRET_KEY')
- 
+
     @staticmethod
     def init_app(app):
         pass
@@ -31,12 +30,10 @@ class StagingConfig(Config):
 class DevelopmentConfig(Config):
     DEVELOPMENT = True
     DEBUG = True
+    PORT = 8080
+    SECRET_KEY = os.environ.get('SECRET_KEY')
 
 class TestingConfig(Config):
-    TESTING = True
-
-
-class HerokuConfig(Config):
     TESTING = True
 
 
@@ -44,6 +41,5 @@ config = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
     'production': ProductionConfig,
-    'heroku': HerokuConfig,
     'default': DevelopmentConfig
 }
